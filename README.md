@@ -27,3 +27,24 @@ foreach ($attributes as $k => $attribute) {
     $newAttributes[$k] = $newVAlues;
     
 }
+
+
+
+
+remove_action('woocommerce_before_shop_loop_item', 'woocommerce_template_loop_product_link_open');
+add_action('woocommerce_before_shop_loop_item_title', 'woocommerce_template_loop_product_link_open', 15);
+
+add_action('woocommerce_before_shop_loop_item', 'woocommerce_add_aff_link_open', 10);
+add_action('woocommerce_before_shop_loop_item_title', 'woocommerce_add_aff_link_close', 10);
+
+function woocommerce_add_aff_link_open(){
+  $product = wc_get_product(get_the_ID());
+  if( $product->is_type( 'external' ) )
+    echo '<a href="' . $product->get_product_url() . '" class="woocommerce-LoopProductImage-link" target="_blank">';
+}
+
+function woocommerce_add_aff_link_close(){
+  $product = wc_get_product(get_the_ID());
+  if( $product->is_type( 'external' ) )
+    echo '</a>';
+}
