@@ -39,8 +39,13 @@ add_action('woocommerce_before_shop_loop_item_title', 'woocommerce_add_aff_link_
 
 function woocommerce_add_aff_link_open(){
   $product = wc_get_product(get_the_ID());
-  if( $product->is_type( 'external' ) )
-    echo '<a href="' . $product->get_product_url() . '" class="woocommerce-LoopProductImage-link" target="_blank">';
+  if( $product->is_type( 'external' ) ) {       
+    echo '<a href="' . $product->get_product_url() . '" class="woocommerce-LoopProductImage-link" target="_blank">';     
+  } else {      
+      $link = apply_filters( 'woocommerce_loop_product_link', get_the_permalink(), $product );
+      echo '<a href="' . esc_url( $link ) . '" class="woocommerce-LoopProduct-link woocommerce-loop-product__link">';
+     // echo '<a href="' . $product->get_product_url() . '" class="woocommerce-LoopProduct-link woocommerce-loop-product__link">';
+  }
 }
 
 function woocommerce_add_aff_link_close(){
@@ -48,3 +53,8 @@ function woocommerce_add_aff_link_close(){
   if( $product->is_type( 'external' ) )
     echo '</a>';
 }
+
+
+https://wordpress.org/plugins/wc-external-product-new-tab/
+
+https://stackoverflow.com/questions/40946495/woocommerce-external-affiliate-product-image-to-external-link-buy-url
