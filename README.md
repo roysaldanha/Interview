@@ -58,3 +58,5 @@ function woocommerce_add_aff_link_close(){
 https://wordpress.org/plugins/wc-external-product-new-tab/
 
 https://stackoverflow.com/questions/40946495/woocommerce-external-affiliate-product-image-to-external-link-buy-url
+
+add_filter('woocommerce_show_variation_price', function() {return true;});
