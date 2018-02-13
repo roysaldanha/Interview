@@ -1,57 +1,80 @@
 <?php
-   /*
-   Plugin Name: Woocommerce Variable Product Reset
-   description: Woocommerce Variable Product Reset
-   Version: 1.0
-   Author: Mr. Roy Saldanha
-   License: GPL2
-   */
-    add_action('admin_menu', 'rvp_show_menu');
- 
-    function rvp_show_menu(){
-            add_options_page( 'Reset Variable Products', 'Reset Variable Products', 'manage_options', 'reset-variable-product', 'rvp_show_page' );
+/*
+Plugin Name: Woocommerce Variable Product Reset
+description: Woocommerce Variable Product Reset
+Version: 1.0
+Author: Mr. Roy Saldanha
+License: GPL2
+*/
+add_action('admin_menu', 'rvp_show_menu');
+
+function rvp_show_menu(){
+        add_options_page( 'Reset Variable Products', 'Reset Variable Products', 'manage_options', 'reset-variable-product', 'rvp_show_page' );
+}
+
+function rvp_show_page(){
+
+    global $wpdb;
+
+    $content = '';
+
+    if(isset($_REQUEST['id']) && !empty($_REQUEST['id'])) { 
+        $is_success = rvp_reset_count($_REQUEST['id']);            
+        header('location:options-general.php?page=reset-variable-product&is_success='.$is_success);            
     }
 
-    function rvp_show_page(){
-        
-        global $wpdb;
-        
-        $myrows = $wpdb->get_results( "select * from wp_posts where post_type='product' AND post_status= 'publish'", 'ARRAY_A' );        
-    
-        $content = '<h1>Hello World!</h1> <br><br><h3>Click on the product name to reset:</h3><br>';
-        
-        $m = 1;
-        foreach ($myrows as $key => $myrow) {
-            $content .= $m. '. <a href="'.rvp_reset_count($myrow['ID']).'" class="btn" >'.$myrow['post_title'].'</a><br><br>';
-            $m++;
-        }
-        echo $content;
-                
+    $myrows = $wpdb->get_results( "select * from wp_posts where post_type='product' AND post_status= 'publish'", 'ARRAY_A' );  
+    $content = '<div class="wrap">';
+
+    if($_REQUEST['is_success'] == 'YES') {
+        $content .= '<div class="notice notice-success"><p>Product reset successfully.</p></div>';
+    } else if($_REQUEST['is_success'] == 'NO') {
+        $content .= '<div class="notice notice-error"><p>Something went wrong. Please try again.</p></div>';
+    } else {
+
     }
-    
-    function rvp_reset_count( ) {
+
+    $content .= '<h1 class="wp-heading-inline">Reset Product Count</h1><h2 class="title">Click on the product name to reset:</h2>';
+    $is_success = '';
+    $m = 1;
+    foreach ($myrows as $key => $myrow) {
+        $content .= $m. '. <a href="options-general.php?page=reset-variable-product&id='.$myrow['ID'].'" class="btn" >'.$myrow['post_title'].'</a><br><br>';
+        $m++;
+    }
+    $content .= "</div>";
+    echo $content;
+
+}
+
+function rvp_reset_count($product_id) {
+
+    if(isset($product_id) && !empty($product_id)) {
         global $wpdb;
 
-        $product = wc_get_product(8);
-        
+        $product = wc_get_product($product_id);
+
         $attributes         = $product->get_attributes();
-    
-        $attribute_keys = array_keys( $attributes );
-        $namesStr = '';
-        foreach ($attribute_keys as $key => $value) {
-            $namesStr .= "'".sanitize_title( $value )."', " ;
-        }
 
-        $myrows = $wpdb->get_results( "select count(`meta_value`) as count,meta_value from wp_woocommerce_order_itemmeta where meta_key IN(".substr($namesStr, 0, -2).") Group by `meta_value`", 'ARRAY_A' );
+            if(count($attributes)>0) {
+            $attribute_keys = array_keys( $attributes );
+            $namesStr = '';
+            foreach ($attribute_keys as $key => $value) {
+                $namesStr .= "'".sanitize_title( $value )."', " ;
+            }
 
-        foreach ($myrows as $key => $myrow) {
-            $data = array('active_status' => 'N');
-            $where = array('meta_value' => $myrow['meta_value']);
-            $wpdb->update( 'wp_woocommerce_order_itemmeta', $data, $where);
+            $myrows = $wpdb->get_results( "select count(`meta_value`) as count,meta_value from wp_woocommerce_order_itemmeta where meta_key IN(".substr($namesStr, 0, -2).") Group by `meta_value`", 'ARRAY_A' );
+
+            foreach ($myrows as $key => $myrow) {
+                $data = array('active_status' => 'N');
+                $where = array('meta_value' => $myrow['meta_value']);
+                $wpdb->update( 'wp_woocommerce_order_itemmeta', $data, $where);
+            }
+
+            return "YES";
         }
-        
-        
     }
-add_shortcode ( 'rvp_reset_count' , 'rvp_reset_count' );
+    return "NO";
+
+}
  
 ?>
