@@ -60,3 +60,9 @@ https://wordpress.org/plugins/wc-external-product-new-tab/
 https://stackoverflow.com/questions/40946495/woocommerce-external-affiliate-product-image-to-external-link-buy-url
 
 add_filter('woocommerce_show_variation_price', function() {return true;});
+
+add_filter( 'woocommerce_dropdown_variation_attribute_options_args', 'wc_remove_options_text');
+function wc_remove_options_text( $args ){
+    $args['show_option_none'] = '';
+    return $args;
+}
